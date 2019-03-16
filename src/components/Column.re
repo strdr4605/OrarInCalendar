@@ -1,12 +1,12 @@
 let component = ReasonReact.statelessComponent("Column");
 
-let handleClick = (_event, _self) => Js.log("clicked!");
+let handleClick = (_event, _self) => Js.log("Column clicked!");
 
-let make = (~info, _children) => {
+let make = (~listInfo, _children) => {
   ...component,
   render: self => {
     let listItems =
-      info |> List.mapi((i, row) => <li key={string_of_int(i)}> {ReasonReact.string(row)} </li>);
+      listInfo |> List.mapi((i, rowInfo) => <li key={string_of_int(i)}> <Row rowInfo /> </li>);
 
     <div onClick={self.handle(handleClick)}>
       {ReasonReact.string("Column")}
