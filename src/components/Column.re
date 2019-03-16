@@ -8,7 +8,7 @@ let make = (~listInfo, _children) => {
     let listItems =
       listInfo |> List.mapi((i, rowInfo) => <li key={string_of_int(i)}> <Row rowInfo /> </li>);
 
-    <div onClick={self.handle(handleClick)}>
+    <div className="Column" onClick={self.handle(handleClick)}>
       {ReasonReact.string("Column")}
       <ul> {ReasonReact.array(Array.of_list(listItems))} </ul>
     </div>;

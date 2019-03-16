@@ -5,6 +5,14 @@ const outputDir = path.join(__dirname, 'build/');
 const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
+  },
   entry: './lib/js/src/Index.bs.js',
   mode: isProd ? 'production' : 'development',
   output: {
