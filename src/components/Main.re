@@ -6,6 +6,5 @@ let firstColumnInfo = ["Orar", "Despre", "Contact"];
 
 let make = _children => {
   ...component,
-  render: _self =>
-    <div className="Main"> {ReasonReact.string("Main")} <Column listInfo=firstColumnInfo /> </div>,
+  render: _self => <div className=Styles.main> <Column listInfo=firstColumnInfo /> <Column listInfo=firstColumnInfo /></div>,
 };

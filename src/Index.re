@@ -12,7 +12,4 @@
 
    ReactDOMRe.renderToElementWithId(<Component2 greeting=(messages.greeting) />, "index2"); */
 
-%raw
-"import css from '../../../src/style.css'";
-
 ReactDOMRe.renderToElementWithId(<Main />, "app");

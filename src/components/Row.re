@@ -8,6 +8,6 @@ let handleClick = (event, _self) => {
 let make = (~rowInfo, _children) => {
   ...component,
   render: self => {
-    <div className="Row" onClick={self.handle(handleClick)}> {ReasonReact.string(rowInfo)} </div>;
+    <div className=Styles.row onClick={self.handle(handleClick)}> {ReasonReact.string(rowInfo)} </div>;
   },
 };
