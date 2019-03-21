@@ -1,14 +1,14 @@
 open Css;
 
-global("html, body, ul", [margin(zero), padding(zero), color(white)]);
+global("html, body, ul", [margin(zero), padding(zero), color(hex("FFF8DC"))]);
 global("ul", [listStyleType(none)]);
 global("li", [margin2(~v=px(1), ~h=zero)]);
 
-let main = style([backgroundColor(hex("00BCEA")), display(flexBox), minHeight(vh(100.))]);
+let main = style([backgroundColor(hex("FFF8DC")), display(flexBox), minHeight(vh(100.))]);
 let column =
   style([
     padding(px(2)),
-    backgroundColor(hex("F4ED7C")),
+    backgroundColor(hex("DCB360")),
     width(px(100)),
     display(flexBox),
     flexDirection(column),
@@ -19,8 +19,8 @@ let row =
     display(flexBox),
     alignItems(center),
     height(px(27)),
-    backgroundColor(hex("F95E59")),
-    border(px(2), solid, hex("DD4C39")),
+    backgroundColor(hex("0B5CBC")),
+    border(px(1), solid, hex("DFD9D7")),
     borderRadius(px(3)),
     paddingLeft(px(5)),
   ]);
