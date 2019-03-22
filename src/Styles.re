@@ -1,6 +1,6 @@
 open Css;
 
-global("html, body, ul", [margin(zero), padding(zero), color(hex("FFFFFF"/* "FFF8DC" */))]);
+global("html, body, ul", [margin(zero), padding(zero), color(hex("FFFFFF"/* "FFF8DC" */)), fontFamily("Arial, Helvetica, sans-serif")]);
 global("ul", [listStyleType(none)]);
 global("li", [margin2(~v=px(1), ~h=zero)]);
 
@@ -15,12 +15,13 @@ let column =
     display(flexBox),
     flexDirection(column),
     margin(px(1)),
+    width(px(200)),
   ]);
 let row =
   style([
     display(flexBox),
     alignItems(center),
-    height(px(27)),
+    height(px(34)),
     backgroundColor(hex("1991DB")),
     /* backgroundColor(hex("0B5CBC")), */
     border(px(2), solid, hex("EEEEEE")),
