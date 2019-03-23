@@ -1,6 +1,6 @@
 let component = ReasonReact.statelessComponent("Column");
 
-let handleClick = (~colId) => Js.log("Column " ++ colId ++ " clicked!");
+// let handleClick = (~colId) => Js.log("Column " ++ colId ++ " clicked!");
 
 let make = (~columnInfo, ~colId, ~selectFn, _children) => {
   ...component,
@@ -16,8 +16,7 @@ let make = (~columnInfo, ~colId, ~selectFn, _children) => {
 
     <div
       className=Styles.column
-      onClick={_event => selectFn(Main.Select((int_of_string(colId), 0)))}
-      >
+      onClick={_event => selectFn(int_of_string(colId), 0)}>
       <ul> {ReasonReact.array(Array.of_list(listItems))} </ul>
     </div>;
   },

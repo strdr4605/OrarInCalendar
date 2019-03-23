@@ -7,13 +7,11 @@ type action =
 
 let component = ReasonReact.reducerComponent("MainComponent");
 
-let handleClick = (_event, _self) => Js.log("clicked!");
+// let handleClick = (_event, _self) => Js.log("clicked!");
 
 let firstColumnInfo = ["Orar", "Despre", "Contact"];
 
 let columns = [firstColumnInfo, firstColumnInfo, firstColumnInfo];
-
-let selectFn = (self, action) => self.ReasonReact.send(action);
 
 let make = _children => {
   ...component,
@@ -22,7 +20,10 @@ let make = _children => {
   reducer: (action, _state) =>
     switch (action) {
     | Select((colId, rowId)) =>
-      ReasonReact.Update({selected: [|colId, rowId|]})
+      Js.log(
+        "SELECTED : " ++ string_of_int(colId) ++ " " ++ string_of_int(rowId),
+      );
+      ReasonReact.Update({selected: [|colId, rowId|]});
     },
 
   initialState: () => {selected: [||]},
@@ -35,7 +36,7 @@ let make = _children => {
              colId
              columnInfo
              key=colId
-             selectFn={selectFn(self)}
+             selectFn={(colId, rowId) => self.send(Select((colId, rowId)))}
            />;
          });
     <div className=Styles.main>
