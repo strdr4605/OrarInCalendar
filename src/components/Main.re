@@ -35,7 +35,7 @@ let make = _children => {
              colId
              columnInfo
              key=colId
-             /* selectFn={selectFn(self)} */
+             selectFn={selectFn(self)}
            />;
          });
     <div className=Styles.main>
