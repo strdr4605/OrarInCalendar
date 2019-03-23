@@ -17,6 +17,7 @@ let main =
     backgroundColor(hex("FFFFFF" /* "FFF8DC" */)),
     display(flexBox),
     minHeight(vh(100.)),
+    maxHeight(vh(100.)),
   ]);
 let column =
   style([
@@ -29,6 +30,7 @@ let column =
     flexDirection(column),
     margin(px(1)),
     width(px(200)),
+    overflow(scroll),
   ]);
 let row =
   style([
