@@ -6,13 +6,26 @@ let handleClick = (~event, ~ids) => {
   event->ReactEvent.Mouse.stopPropagation;
 };
 
-let isSelected = ((colId, rowId)) => (colId == "1" && rowId == "2") || (colId == "0" && rowId == "0");
+let isSelected = ids =>
+  switch (ids) {
+  | ("1", "1")
+  | ("0", "0")
+  | ("2", "0") => true
+  | (_, _) => false
+  };
 
 let make = (~rowInfo, ~ids: (string, string), _children) => {
   ...component,
   render: _self => {
     <div
-      className={Utils.cssClasses([Styles.row, {if (isSelected(ids)) Styles.selected else ""}])}
+      className={Utils.cssClasses([
+        Styles.row,
+        if (isSelected(ids)) {
+          Styles.selected;
+        } else {
+          "";
+        },
+      ])}
       onClick={event => handleClick(~event, ~ids)}>
       {ReasonReact.string(rowInfo)}
     </div>;
