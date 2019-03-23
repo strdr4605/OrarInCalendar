@@ -10,6 +10,7 @@ type data =
 
 /* State declaration */
 type state = {
+  columns: array(array(string)),
   data,
   selected: array(int),
 };
@@ -45,6 +46,32 @@ let columns = [firstColumnInfo, firstColumnInfo, firstColumnInfo];
 
 let selectFn = (self, action) => self.ReasonReact.send(action);
 
+let createColumns = breeds => {
+  breeds
+  |> Array.sort((a, b) =>
+       Array.length(b.subBreeds) - Array.length(a.subBreeds)
+     );
+  let sortedBreedNames =
+    breeds |> Array.to_list |> List.map(breed => breed.name);
+
+  let columns = [["Dogs", ...firstColumnInfo], sortedBreedNames, breeds[1].subBreeds |> Array.to_list ];
+  let columnComponents =
+    columns
+    |> List.mapi((i, columnInfo) => {
+         let colId = string_of_int(i);
+         <Column
+           colId
+           columnInfo
+           key=colId
+           /* selectFn={selectFn(self)} */
+         />;
+       });
+  <div className=Styles.main>
+    {ReasonReact.array(Array.of_list(columnComponents))}
+    <img height="340" width="500" src="https://images.dog.ceo/breeds/spaniel-blenheim/n02086646_2173.jpg" />
+  </div>;
+};
+
 let make = _children => {
   ...component,
 
@@ -78,36 +105,13 @@ let make = _children => {
       ReasonReact.Update({...state, data: Error(err)})
     },
 
-  initialState: () => {data: Loading, selected: [||]},
+  initialState: () => {data: Loading, selected: [||], columns: [||]},
   didMount: self => self.send(BreedsFetch),
   render: self => {
     switch (self.state.data) {
     | Error(_err) => <div> {ReasonReact.string("An error occurred!")} </div>
     | Loading => <div> {ReasonReact.string("Loading...")} </div>
-    | Loaded(breeds) =>
-      let sortedBreedNames =
-        breeds
-        |> Array.to_list
-        |> List.sort((a, b) =>
-             Array.length(b.subBreeds) - Array.length(a.subBreeds)
-           )
-        |> List.map(breed => breed.name);
-      let terrier = breeds[82].subBreeds |> Array.to_list;
-      let columns = [["Dogs", ...firstColumnInfo], sortedBreedNames];
-      let columnComponents =
-        columns
-        |> List.mapi((i, columnInfo) => {
-             let colId = string_of_int(i);
-             <Column
-               colId
-               columnInfo
-               key=colId
-               /* selectFn={selectFn(self)} */
-             />;
-           });
-      <div className=Styles.main>
-        {ReasonReact.array(Array.of_list(columnComponents))}
-      </div>;
+    | Loaded(breeds) => createColumns(breeds)
     };
   },
 };
