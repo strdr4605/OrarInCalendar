@@ -1,14 +1,19 @@
 let component = ReasonReact.statelessComponent("Row");
 
-let handleClick = (~event, ~rowId) => {
-  Js.log("Row " ++ rowId ++ " clicked!");
+let handleClick = (~event, ~ids) => {
+  let (colId, rowId) = ids;
+  Js.log("c" ++ colId ++ "r" ++ rowId ++ " clicked!");
   event->ReactEvent.Mouse.stopPropagation;
 };
 
-let make = (~rowInfo, ~rowId, _children) => {
+let isSelected = ((colId, rowId)) => (colId == "1" && rowId == "2") || (colId == "0" && rowId == "0");
+
+let make = (~rowInfo, ~ids: (string, string), _children) => {
   ...component,
   render: _self => {
-    <div className=Styles.row onClick={event => handleClick(~event, ~rowId)}>
+    <div
+      className={Utils.cssClasses([Styles.row, {if (isSelected(ids)) Styles.selected else ""}])}
+      onClick={event => handleClick(~event, ~ids)}>
       {ReasonReact.string(rowInfo)}
     </div>;
   },

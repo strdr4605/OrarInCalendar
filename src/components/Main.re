@@ -1,20 +1,45 @@
-let component = ReasonReact.statelessComponent("MainComponent");
+/* State declaration */
+type state = {selected: array(int)};
+
+/* Action declaration */
+type action =
+  | Select((int, int));
+
+let component = ReasonReact.reducerComponent("MainComponent");
 
 let handleClick = (_event, _self) => Js.log("clicked!");
 
 let firstColumnInfo = ["Orar", "Despre", "Contact"];
 
-let columns = [firstColumnInfo, firstColumnInfo];
+let columns = [firstColumnInfo, firstColumnInfo, firstColumnInfo];
+
+let selectFn = (self, action) => self.ReasonReact.send(action);
 
 let make = _children => {
   ...component,
-  render: _self => {
+
+  /* State transitions */
+  reducer: (action, _state) =>
+    switch (action) {
+    | Select((colId, rowId)) =>
+      ReasonReact.Update({selected: [|colId, rowId|]})
+    },
+
+  initialState: () => {selected: [||]},
+  render: self => {
     let columnComponents =
       columns
       |> List.mapi((i, columnInfo) => {
-           let colId = "c" ++ string_of_int(i);
-           <Column colId columnInfo key=colId />;
+           let colId = string_of_int(i);
+           <Column
+             colId
+             columnInfo
+             key=colId
+             /* selectFn={selectFn(self)} */
+           />;
          });
-    <div className=Styles.main> {ReasonReact.array(Array.of_list(columnComponents))} </div>;
+    <div className=Styles.main>
+      {ReasonReact.array(Array.of_list(columnComponents))}
+    </div>;
   },
 };
