@@ -22,26 +22,17 @@ type action =
   | BreedsFailedToFetch(Js.Promise.error);
 
 module Decode = {
-  let breedDict = (key, json) =>
-    Json.Decode.(json |> field(key, array(string)));
-
-  let breeds = (json): array(breed) =>
-    Json.Decode.(
-      json
-      |> field("message", array(string))
-      |> Array.map(name => {name, subBreeds: [||]})
-    );
-
-  let subBreeds = (breeds, json): array(breed) =>
-    Json.Decode.(
-      breeds
-      |> Array.map(breed =>
-           {
-             ...breed,
-             subBreeds: json |> field("message", breedDict(breed.name)),
-           }
-         )
-    );
+  let subBreeds = (json): array(breed) => {
+    let breedsDict =
+      Json.Decode.(json |> field("message", d => d |> dict(array(string))));
+    breedsDict
+    |> Js.Dict.keys
+    |> Array.map(name => {
+         let subBreeds =
+           Js.Option.getWithDefault([||], Js.Dict.get(breedsDict, name));
+         {name, subBreeds};
+       });
+  };
 };
 
 let component = ReasonReact.reducerComponent("MainComponent");
@@ -67,18 +58,13 @@ let make = _children => {
         {...state, data: Loading},
         self =>
           Js.Promise.(
-            Fetch.fetch("https://dog.ceo/api/breeds/list")
+            Fetch.fetch("https://dog.ceo/api/breeds/list/all")
             |> then_(Fetch.Response.json)
-            |> then_(json => json |> Decode.breeds |> Js.Promise.resolve)
-            |> then_(breeds =>
-                 Fetch.fetch("https://dog.ceo/api/breeds/list/all")
-                 |> then_(Fetch.Response.json)
-                 |> then_(json =>
-                      json
-                      |> Decode.subBreeds(breeds)
-                      |> (breeds => self.send(BreedsFetched(breeds)))
-                      |> resolve
-                    )
+            |> then_(json =>
+                 json
+                 |> Decode.subBreeds
+                 |> (breeds => self.send(BreedsFetched(breeds)))
+                 |> resolve
                )
             |> catch(err =>
                  Js.Promise.resolve(self.send(BreedsFailedToFetch(err)))
@@ -96,25 +82,32 @@ let make = _children => {
   didMount: self => self.send(BreedsFetch),
   render: self => {
     switch (self.state.data) {
-    | Error(err) => Js.log(err)
-    | Loading => Js.log("Loading...")
-    | Loaded(breeds) => Js.log(breeds)
+    | Error(_err) => <div> {ReasonReact.string("An error occurred!")} </div>
+    | Loading => <div> {ReasonReact.string("Loading...")} </div>
+    | Loaded(breeds) =>
+      let sortedBreedNames =
+        breeds
+        |> Array.to_list
+        |> List.sort((a, b) =>
+             Array.length(b.subBreeds) - Array.length(a.subBreeds)
+           )
+        |> List.map(breed => breed.name);
+      let terrier = breeds[82].subBreeds |> Array.to_list;
+      let columns = [["Dogs", ...firstColumnInfo], sortedBreedNames];
+      let columnComponents =
+        columns
+        |> List.mapi((i, columnInfo) => {
+             let colId = string_of_int(i);
+             <Column
+               colId
+               columnInfo
+               key=colId
+               /* selectFn={selectFn(self)} */
+             />;
+           });
+      <div className=Styles.main>
+        {ReasonReact.array(Array.of_list(columnComponents))}
+      </div>;
     };
-
-    let columnComponents =
-      columns
-      |> List.mapi((i, columnInfo) => {
-           let colId = string_of_int(i);
-           <Column
-             colId
-             columnInfo
-             key=colId
-             /* selectFn={selectFn(self)} */
-           />;
-         });
-    <div className=Styles.main>
-      {ReasonReact.array(Array.of_list(columnComponents))}
-      <FetchExample />
-    </div>;
   },
 };
