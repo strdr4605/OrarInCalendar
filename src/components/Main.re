@@ -36,13 +36,29 @@ module Decode = {
   };
 };
 
+let breedFetching = state =>
+  ReasonReact.UpdateWithSideEffects(
+    {...state, data: Loading},
+    self =>
+      Js.Promise.(
+        Fetch.fetch("https://dog.ceo/api/breeds/list/all")
+        |> then_(Fetch.Response.json)
+        |> then_(json =>
+             json
+             |> Decode.subBreeds
+             |> (breeds => self.send(BreedsFetched(breeds)))
+             |> resolve
+           )
+        |> catch(err =>
+             Js.Promise.resolve(self.send(BreedsFailedToFetch(err)))
+           )
+        |> ignore
+      ),
+  );
+
 let component = ReasonReact.reducerComponent("MainComponent");
 
-let handleClick = (_event, _self) => Js.log("clicked!");
-
-let firstColumnInfo = ["Orar", "Despre", "Contact"];
-
-let columns = [firstColumnInfo, firstColumnInfo, firstColumnInfo];
+let firstColumnInfo = [|"Dogs", "Orar", "Despre", "Contact"|];
 
 let selectFn = (self, action) => self.ReasonReact.send(action);
 
@@ -51,13 +67,12 @@ let createColumns = breeds => {
   |> Array.sort((a, b) =>
        Array.length(b.subBreeds) - Array.length(a.subBreeds)
      );
-  let sortedBreedNames =
-    breeds |> Array.to_list |> List.map(breed => breed.name);
+  let sortedBreedNames = breeds |> Array.map(breed => breed.name);
 
-  let columns = [["Dogs", ...firstColumnInfo], sortedBreedNames, breeds[1].subBreeds |> Array.to_list ];
+  let columns = [|firstColumnInfo, sortedBreedNames, breeds[1].subBreeds|];
   let columnComponents =
     columns
-    |> List.mapi((i, columnInfo) => {
+    |> Array.mapi((i, columnInfo) => {
          let colId = string_of_int(i);
          <Column
            colId
@@ -67,8 +82,12 @@ let createColumns = breeds => {
          />;
        });
   <div className=Styles.main>
-    {ReasonReact.array(Array.of_list(columnComponents))}
-    <img height="340" width="500" src="https://images.dog.ceo/breeds/spaniel-blenheim/n02086646_2173.jpg" />
+    {ReasonReact.array(columnComponents)}
+    <img
+      height="340"
+      width="500"
+      src="https://images.dog.ceo/breeds/spaniel-blenheim/n02086646_2173.jpg"
+    />
   </div>;
 };
 
@@ -80,25 +99,7 @@ let make = _children => {
     switch (action) {
     | Select((colId, rowId)) =>
       ReasonReact.Update({...state, selected: [|colId, rowId|]})
-    | BreedsFetch =>
-      ReasonReact.UpdateWithSideEffects(
-        {...state, data: Loading},
-        self =>
-          Js.Promise.(
-            Fetch.fetch("https://dog.ceo/api/breeds/list/all")
-            |> then_(Fetch.Response.json)
-            |> then_(json =>
-                 json
-                 |> Decode.subBreeds
-                 |> (breeds => self.send(BreedsFetched(breeds)))
-                 |> resolve
-               )
-            |> catch(err =>
-                 Js.Promise.resolve(self.send(BreedsFailedToFetch(err)))
-               )
-            |> ignore
-          ),
-      )
+    | BreedsFetch => breedFetching(state)
     | BreedsFetched(breeds) =>
       ReasonReact.Update({...state, data: Loaded(breeds)})
     | BreedsFailedToFetch(err) =>
