@@ -36,7 +36,15 @@ module Decode = {
   };
 };
 
-let breedFetching = state =>
+let sortBreeds = breeds => {
+  breeds
+  |> Array.sort((a, b) =>
+       Array.length(b.subBreeds) - Array.length(a.subBreeds)
+     );
+  breeds;
+};
+
+let breedsFetching = state =>
   ReasonReact.UpdateWithSideEffects(
     {...state, data: Loading},
     self =>
@@ -46,6 +54,7 @@ let breedFetching = state =>
         |> then_(json =>
              json
              |> Decode.subBreeds
+             |> sortBreeds
              |> (breeds => self.send(BreedsFetched(breeds)))
              |> resolve
            )
@@ -60,16 +69,10 @@ let component = ReasonReact.reducerComponent("MainComponent");
 
 let firstColumnInfo = [|"Dogs", "Orar", "Despre", "Contact"|];
 
-let selectFn = (self, action) => self.ReasonReact.send(action);
+let selectAction = (self, ids) => self.ReasonReact.send(Select(ids));
 
-let createColumns = breeds => {
-  breeds
-  |> Array.sort((a, b) =>
-       Array.length(b.subBreeds) - Array.length(a.subBreeds)
-     );
-  let sortedBreedNames = breeds |> Array.map(breed => breed.name);
-
-  let columns = [|firstColumnInfo, sortedBreedNames, breeds[1].subBreeds|];
+let createColumns = (self, breeds) => {
+  let columns = self.ReasonReact.state.columns;
   let columnComponents =
     columns
     |> Array.mapi((i, columnInfo) => {
@@ -78,7 +81,14 @@ let createColumns = breeds => {
            colId
            columnInfo
            key=colId
-           /* selectFn={selectFn(self)} */
+           selectAction={selectAction(self)}
+           selectedRow={
+                         if (Array.length(self.ReasonReact.state.selected) > i) {
+                           self.ReasonReact.state.selected[i];
+                         } else {
+                           (-1);
+                         }
+                       }
          />;
        });
   <div className=Styles.main>
@@ -98,21 +108,36 @@ let make = _children => {
   reducer: (action, state) =>
     switch (action) {
     | Select((colId, rowId)) =>
-      ReasonReact.Update({...state, selected: [|colId, rowId|]})
-    | BreedsFetch => breedFetching(state)
+      let selected = state.selected;
+      selected[colId] = rowId;
+      /* let columns = Array.append(state.columns); */
+      ReasonReact.Update({...state, selected});
+    | BreedsFetch => breedsFetching(state)
     | BreedsFetched(breeds) =>
-      ReasonReact.Update({...state, data: Loaded(breeds)})
+      ReasonReact.Update({
+        ...state,
+        data: Loaded(breeds),
+        columns:
+          Array.append(
+            state.columns,
+            [|breeds |> Array.map(breed => breed.name)|],
+          ),
+      })
     | BreedsFailedToFetch(err) =>
       ReasonReact.Update({...state, data: Error(err)})
     },
 
-  initialState: () => {data: Loading, selected: [||], columns: [||]},
+  initialState: () => {
+    data: Loading,
+    selected: [|0, (-1), (-1)|],
+    columns: [|firstColumnInfo|],
+  },
   didMount: self => self.send(BreedsFetch),
   render: self => {
     switch (self.state.data) {
     | Error(_err) => <div> {ReasonReact.string("An error occurred!")} </div>
     | Loading => <div> {ReasonReact.string("Loading...")} </div>
-    | Loaded(breeds) => createColumns(breeds)
+    | Loaded(breeds) => createColumns(self, breeds)
     };
   },
 };

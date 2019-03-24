@@ -2,7 +2,7 @@ let component = ReasonReact.statelessComponent("Column");
 
 let handleClick = (~colId) => Js.log("Column " ++ colId ++ " clicked!");
 
-let make = (~columnInfo, ~colId, _children) => {
+let make = (~columnInfo, ~colId, ~selectAction, ~selectedRow, _children) => {
   ...component,
   render: _self => {
     let arrayItems =
@@ -10,7 +10,7 @@ let make = (~columnInfo, ~colId, _children) => {
       |> Array.mapi((i, rowInfo) => {
            let rowId = string_of_int(i);
            <li key={string_of_int(i)}>
-             <Row ids=(colId, rowId) rowInfo />
+             <Row ids=(colId, rowId) rowInfo selectAction isSelected={if (i == selectedRow) true else false}/>
            </li>;
          });
 
