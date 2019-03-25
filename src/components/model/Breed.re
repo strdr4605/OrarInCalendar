@@ -3,7 +3,7 @@ type breed = {
   name: string,
   subBreeds: array(subBreed),
 };
-type data =
+type breeds =
   | Loading
   | Error(Js.Promise.error)
   | Loaded(array(breed));
@@ -11,7 +11,7 @@ type data =
 /* State declaration */
 type state = {
   columns: array(array(string)),
-  data,
+  breeds,
   selected: array(int),
 };
 
@@ -46,7 +46,7 @@ let sortBreeds = breeds => {
 
 let breedsFetching = state =>
   ReasonReact.UpdateWithSideEffects(
-    {...state, data: Loading},
+    {...state, breeds: Loading},
     self =>
       Js.Promise.(
         Fetch.fetch("https://dog.ceo/api/breeds/list/all")
@@ -65,18 +65,45 @@ let breedsFetching = state =>
       ),
   );
 
+let selectAction = (state, ids) => {
+  let (colId, rowId) = ids;
+  let selected = state.selected;
+  selected[colId] = rowId;
+  if (colId == 1) {
+    selected[2] = (-1);
+  };
+  if (selected[0] == 0) {
+    let column1 =
+      switch (state.breeds) {
+      | Loaded(breeds) => breeds |> Array.map(breed => breed.name)
+      | _ => [||]
+      };
+    let columns = [|state.columns[0], column1|];
+    if (selected[1] != (-1)) {
+      let column2 =
+        switch (state.breeds) {
+        | Loaded(breeds) => breeds[selected[1]].subBreeds
+        | _ => [||]
+        };
+      let columns = Array.append(columns, [|column2|]);
+      ReasonReact.Update({...state, selected, columns});
+    } else {
+      ReasonReact.Update({...state, selected, columns});
+    };
+  } else {
+    let selected = [|state.selected[0], (-1), (-1)|];
+    ReasonReact.Update({...state, selected, columns: [|state.columns[0]|]});
+  };
+};
+
 let reducer = (action, state) =>
   switch (action) {
-  | Select((colId, rowId)) =>
-    let selected = state.selected;
-    selected[colId] = rowId;
-    /* let columns = Array.append(state.columns); */
-    ReasonReact.Update({...state, selected});
+  | Select(ids) => selectAction(state, ids)
   | BreedsFetch => breedsFetching(state)
   | BreedsFetched(breeds) =>
     ReasonReact.Update({
       ...state,
-      data: Loaded(breeds),
+      breeds: Loaded(breeds),
       columns:
         Array.append(
           state.columns,
@@ -84,5 +111,5 @@ let reducer = (action, state) =>
         ),
     })
   | BreedsFailedToFetch(err) =>
-    ReasonReact.Update({...state, data: Error(err)})
+    ReasonReact.Update({...state, breeds: Error(err)})
   };
