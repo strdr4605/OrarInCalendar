@@ -13,10 +13,12 @@ type state = {
   columns: array(array(string)),
   breeds,
   selected: array(int),
+  image: string,
 };
 
 /* Action declaration */
 type action =
+  | NewImage(string)
   | Select((int, int))
   | BreedsFetch
   | BreedsFetched(array(breed))
@@ -33,6 +35,10 @@ module Decode = {
            Js.Option.getWithDefault([||], Js.Dict.get(breedsDict, name));
          {name, subBreeds};
        });
+  };
+
+  let image = (json): string => {
+    Json.Decode.(json |> field("message", string));
   };
 };
 
@@ -65,6 +71,46 @@ let breedsFetching = state =>
       ),
   );
 
+let fetchBreedImage = (url, self) =>
+  Js.Promise.(
+    Fetch.fetch(url)
+    |> then_(Fetch.Response.json)
+    |> then_(json =>
+         json
+         |> Decode.image
+         |> (image => self.ReasonReact.send(NewImage(image)))
+         |> resolve
+       )
+    |> catch(_err =>
+         Js.Promise.resolve(self.ReasonReact.send(NewImage("")))
+       )
+    |> ignore
+  );
+
+let getBreedUrl = state => {
+  let url = "https://dog.ceo/api/breed/";
+  if (state.selected[0] == 0 && state.selected[1] != (-1)) {
+    let breed =
+      switch (state.breeds) {
+      | Loaded(breeds) =>
+        let breedUrl = breeds[state.selected[1]].name ++ "/";
+        if (state.selected[2] != (-1)) {
+          breedUrl
+          ++ breeds[state.selected[1]].subBreeds[state.selected[2]]
+          ++ "/";
+        } else {
+          breedUrl;
+        };
+      | _ => "terrier/"
+      };
+
+    let requestUrl = url ++ breed ++ "images/random";
+    requestUrl;
+  } else {
+    "https://dog.ceo/api/breeds/image/random";
+  };
+};
+
 let selectAction = (state, ids) => {
   let (colId, rowId) = ids;
   let selected = state.selected;
@@ -79,17 +125,21 @@ let selectAction = (state, ids) => {
       | _ => [||]
       };
     let columns = [|state.columns[0], column1|];
-    if (selected[1] != (-1)) {
-      let column2 =
-        switch (state.breeds) {
-        | Loaded(breeds) => breeds[selected[1]].subBreeds
-        | _ => [||]
-        };
-      let columns = Array.append(columns, [|column2|]);
-      ReasonReact.Update({...state, selected, columns});
-    } else {
-      ReasonReact.Update({...state, selected, columns});
-    };
+    let columns =
+      if (selected[1] != (-1)) {
+        let column2 =
+          switch (state.breeds) {
+          | Loaded(breeds) => breeds[selected[1]].subBreeds
+          | _ => [||]
+          };
+        Array.append(columns, [|column2|]);
+      } else {
+        columns;
+      };
+    ReasonReact.UpdateWithSideEffects(
+      {...state, selected, columns},
+      self => fetchBreedImage(getBreedUrl(state), self),
+    );
   } else {
     let selected = [|state.selected[0], (-1), (-1)|];
     ReasonReact.Update({...state, selected, columns: [|state.columns[0]|]});
@@ -112,4 +162,5 @@ let reducer = (action, state) =>
     })
   | BreedsFailedToFetch(err) =>
     ReasonReact.Update({...state, breeds: Error(err)})
+  | NewImage(image) => ReasonReact.Update({...state, image})
   };
