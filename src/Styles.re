@@ -45,4 +45,4 @@ let row =
     paddingLeft(px(5)),
   ]);
 
-let selected = style([backgroundColor(hex("07F767"))]);
+let selected = style([backgroundColor(hex("34D058" /* "07F767" */))]);
