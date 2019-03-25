@@ -38,11 +38,7 @@ let createColumns = self => {
        });
   <div className=Styles.main>
     {ReasonReact.array(columnComponents)}
-    <img
-      height="340"
-      width="500"
-      src="https://images.dog.ceo/breeds/spaniel-blenheim/n02086646_2173.jpg"
-    />
+    <img height="500" width="500" src={self.ReasonReact.state.image} />
   </div>;
 };
 
@@ -53,6 +49,7 @@ let make = _children => {
     breeds: Loading,
     selected: [|0, (-1), (-1)|],
     columns: [|firstColumnInfo|],
+    image: "https://avatars0.githubusercontent.com/u/16056918",
   },
   didMount: self => self.send(BreedsFetch),
   render: self => {
