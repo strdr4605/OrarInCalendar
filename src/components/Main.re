@@ -20,12 +20,11 @@ let createColumns = self => {
   let columns = removeEmptyColumn(self.ReasonReact.state.columns);
   let columnComponents =
     columns
-    |> Array.mapi((i, columnInfo) => {
-         let colId = string_of_int(i);
+    |> Array.mapi((i, columnInfo) =>
          <Column
-           colId
+           colId=i
            columnInfo
-           key=colId
+           key={string_of_int(i)}
            appSend={self.ReasonReact.send}
            selectedRow={
                          if (Array.length(self.ReasonReact.state.selected) > i) {
@@ -34,8 +33,8 @@ let createColumns = self => {
                            (-1);
                          }
                        }
-         />;
-       });
+         />
+       );
   <div className=Styles.main>
     {ReasonReact.array(columnComponents)}
     <img height="500" width="500" src={self.ReasonReact.state.image} />

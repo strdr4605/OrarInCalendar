@@ -1,10 +1,7 @@
 let component = ReasonReact.statelessComponent("Row");
 
 let handleClick = (~event, ~ids, ~appSend) => {
-  let (colId, rowId) = ids;
-  Js.log("c" ++ colId ++ "r" ++ rowId ++ " clicked!");
-  let intIds = (int_of_string(colId), int_of_string(rowId));
-  appSend(Breed.Select(intIds));
+  appSend(Breed.Select(ids));
   event->ReactEvent.Mouse.stopPropagation;
 };
 
