@@ -12,7 +12,7 @@ let make = (~rowInfo, ~ids, ~appSend, ~isSelected, _children) => {
   ...component,
   render: _self => {
     <div
-      className={Utils.cssClasses([
+      className={MyUtils.cssClasses([
         Styles.row,
         if (isSelected) {Styles.selected} else {""},
       ])}
