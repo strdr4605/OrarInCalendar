@@ -32,7 +32,7 @@ module Decode = {
     |> Js.Dict.keys
     |> Array.map(name => {
          let subBreeds =
-           Js.Option.getWithDefault([||], Js.Dict.get(breedsDict, name));
+           Js.Option.getWithDefault([||], Js.Dict.get(breedsDict, name)); /* Js.Dict.unsafeGet(breedsDict, name) - because we used Js.Dict.keys previously */
          {name, subBreeds};
        });
   };
