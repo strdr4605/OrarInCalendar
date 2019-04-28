@@ -50,9 +50,9 @@ let make = _children => {
     columns: [|firstColumnInfo|],
     image: "https://avatars0.githubusercontent.com/u/16056918",
   },
-  didMount: self => self.send(BreedsFetch),
-  render: self => {
-    switch (self.state.breeds) {
+  didMount: self => self.ReasonReact.send(BreedsFetch),
+  ReasonReact.render: self => {
+    switch (self.ReasonReact.state.breeds) {
     | Error(_err) => <div> {ReasonReact.string("An error occurred!")} </div>
     | Loading => <div> {ReasonReact.string("Loading...")} </div>
     | Loaded(_breeds) => createColumns(self)

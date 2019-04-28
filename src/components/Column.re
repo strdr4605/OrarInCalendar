@@ -2,7 +2,7 @@ let component = ReasonReact.statelessComponent("Column");
 
 let make = (~columnInfo, ~colId, ~appSend, ~selectedRow, _children) => {
   ...component,
-  render: _self => {
+  ReasonReact.render: _self => {
     let arrayItems =
       columnInfo
       |> Array.mapi((i, rowInfo) =>
