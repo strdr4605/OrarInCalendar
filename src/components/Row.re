@@ -7,7 +7,7 @@ let handleClick = (~event, ~ids, ~appSend) => {
 
 let make = (~rowInfo, ~ids, ~appSend, ~isSelected, _children) => {
   ...component,
-  render: _self => {
+  ReasonReact.render: _self => {
     <div
       className={Cn.make([
         Styles.row,
