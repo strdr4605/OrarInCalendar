@@ -17,6 +17,7 @@
     "bs-fetch",
     "@glennsl/bs-json",
     "bs-css",
+    "re-classnames",
     "reason-react"
   ],
   "warnings": {

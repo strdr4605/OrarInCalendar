@@ -61,11 +61,11 @@ let breedsFetching = state =>
              json
              |> Decode.subBreeds
              |> sortBreeds
-             |> (breeds => self.send(BreedsFetched(breeds)))
+             |> (breeds => self.ReasonReact.send(BreedsFetched(breeds)))
              |> resolve
            )
         |> catch(err =>
-             Js.Promise.resolve(self.send(BreedsFailedToFetch(err)))
+             Js.Promise.resolve(self.ReasonReact.send(BreedsFailedToFetch(err)))
            )
         |> ignore
       ),
@@ -101,7 +101,8 @@ let getBreedUrl = state => {
         } else {
           breedUrl;
         };
-      | _ => "terrier/"
+      | Loading
+      | Error(_) => "terrier/"
       };
 
     let requestUrl = url ++ breed ++ "images/random";
@@ -122,7 +123,8 @@ let selectAction = (state, ids) => {
     let column1 =
       switch (state.breeds) {
       | Loaded(breeds) => breeds |> Array.map(breed => breed.name)
-      | _ => [||]
+      | Loading
+      | Error(_) => [||]
       };
     let columns = [|state.columns[0], column1|];
     let columns =
@@ -130,7 +132,8 @@ let selectAction = (state, ids) => {
         let column2 =
           switch (state.breeds) {
           | Loaded(breeds) => breeds[selected[1]].subBreeds
-          | _ => [||]
+          | Loading
+          | Error(_) => [||]
           };
         Array.append(columns, [|column2|]);
       } else {
