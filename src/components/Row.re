@@ -9,9 +9,9 @@ let make = (~rowInfo, ~ids, ~appSend, ~isSelected, _children) => {
   ...component,
   render: _self => {
     <div
-      className={MyUtils.cssClasses([
+      className={Cn.make([
         Styles.row,
-        if (isSelected) {Styles.selected} else {""},
+        Styles.selected->Cn.ifTrue(isSelected),
       ])}
       onClick={event => handleClick(~event, ~ids, ~appSend)}>
       {ReasonReact.string(rowInfo)}
