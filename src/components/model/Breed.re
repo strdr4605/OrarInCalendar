@@ -31,9 +31,9 @@ module Decode = {
     breedsDict
     |> Js.Dict.keys
     |> Array.map(name => {
-         let subBreeds =
+         let subBreedsArray =
            Js.Option.getWithDefault([||], Js.Dict.get(breedsDict, name)); /* Js.Dict.unsafeGet(breedsDict, name) - because we used Js.Dict.keys previously */
-         {name, subBreeds};
+         {name, subBreeds: subBreedsArray};
        });
   };
 
@@ -65,7 +65,9 @@ let breedsFetching = state =>
              |> resolve
            )
         |> catch(err =>
-             Js.Promise.resolve(self.ReasonReact.send(BreedsFailedToFetch(err)))
+             Js.Promise.resolve(
+               self.ReasonReact.send(BreedsFailedToFetch(err)),
+             )
            )
         |> ignore
       ),
